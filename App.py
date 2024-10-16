@@ -6,8 +6,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from twilio.twiml.voice_response import VoiceResponse
 import mysql.connector
-from telegram import Bot, Update
+from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__)
 app.secret_key = 'SOME_SECRET_KEY'
@@ -100,12 +102,16 @@ def save_user_phone(chat_id, phone_number):
     conn.close()
 
 
-def get_user(chat_id):
-    """Recupera i dettagli dell'utente dal database."""
+def get_user(identifier, is_phone=False):
+    """Recupera i dettagli dell'utente dal database utilizzando chat_id o numero di telefono."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT name, phone_number FROM users WHERE chat_id = %s', (chat_id,))
+    if is_phone:
+        cursor.execute('SELECT chat_id, name FROM users WHERE phone_number = %s', (identifier,))
+    else:
+        cursor.execute('SELECT name, phone_number FROM users WHERE chat_id = %s', (identifier,))
+
     user = cursor.fetchone()
 
     cursor.close()
@@ -146,7 +152,7 @@ def incoming_call():
     to_number = request.form['To']
 
     contact_name = get_contact_name(from_number)
-    user = get_user_by_phone(to_number),  """Funzione che ottiene l'utente dal numero di telefono"""
+    user = get_user(to_number, is_phone=True),  """Funzione che ottiene l'utente dal numero di telefono"""
 
     if user:
         chat_id = user[0]
@@ -155,6 +161,9 @@ def incoming_call():
             message = f"Ciao {user_name}, hai una chiamata persa da {contact_name} (numero {from_number})."
         else:
             message = f"Ciao {user_name}, hai una chiamata persa da {from_number}."
+
+            """Avvisa l'utente"""
+            bot.send_message(chat_id=chat_id, text=message)
 
     response = VoiceResponse()
     response.say("Non puoi rispondere al telefono. Puoi lasciare un messaggio dopo il segnale.")
@@ -174,7 +183,7 @@ def handle_recording():
     recording_url = request.form['RecordingUrl']
 
     contact_name = get_contact_name(from_number)
-    user = get_user_by_phone(from_number)  # Funzione che ottiene l'utente dal numero di telefono
+    user = get_user(from_number, is_phone=True),  """Funzione che ottiene l'utente dal numero di telefono"""
 
     if user:
         chat_id = user[0]
