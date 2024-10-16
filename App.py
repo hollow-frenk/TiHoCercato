@@ -111,7 +111,7 @@ def get_user(chat_id):
     cursor.close()
     conn.close()
 
-    return user, """Restituisce una tupla (name, phone_number) o None"""
+    return user, """Restituisce una 'tuple' (name, phone_number) o None"""
 
 
 def save_voice_message(chat_id, voice_url, message_id):
