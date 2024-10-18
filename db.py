@@ -1,5 +1,4 @@
 import mysql.connector
-import datetime
 
 # Configurazione del database
 db_config = {

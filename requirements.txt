@@ -1,8 +1,10 @@
-Flask
-pyTelegramBotAPI
-twilio
-mysql-connector-python
+Flask~=3.0.3
+pyTelegramBotAPI~=4.23.0
+twilio~=9.3.4
+mysql-connector-python~=9.1.0
 google-auth
-google-auth-oauthlib
+google-auth-oauthlib~=1.2.1
 google-auth-httplib2
-google-api-python-client
+google-api-python-client~=2.149.0
+google~=3.0.0
+protobuf~=5.28.2
