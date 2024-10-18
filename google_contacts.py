@@ -31,7 +31,7 @@ def authenticate_user(user_id):
         # Se il token è scaduto, aggiornarlo
         if creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            # Aggiorna il token di accesso e l'expiry nel database
+            # Aggiorna il token di accesso e la scadenza nel database
             db.update_user_google_token(user_id, creds.token, creds.expiry)
     else:
         # Avvia il flusso OAuth 2.0 se non ci sono credenziali nel database
